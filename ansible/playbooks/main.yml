@@ -1,0 +1,105 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: Download geth
+      get_url:
+        url: "https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-1.10.25-69568c55.tar.gz"
+        dest: "/home/ubuntu/geth-linux-amd64-1.10.25-69568c55.tar.gz"
+        mode: 0644
+
+    - name: extract geth tarball
+      unarchive:
+        remote_src: yes
+        src: "/home/ubuntu/geth-linux-amd64-1.10.25-69568c55.tar.gz"
+        dest: "/home/ubuntu"
+
+    - name: ensure geth service stopped before copy
+      shell: "[[ -e /lib/systemd/system/geth.service ]] && systemctl stop geth"
+      ignore_errors: yes
+
+    - name: copy the geth binary
+      shell: /bin/mv /home/ubuntu/geth-linux-amd64-1.10.25-69568c55/geth /usr/local/bin
+
+    - name: create data directory for geth
+      file:
+        state: directory
+        path: /data/ethereum
+        owner: ubuntu
+        group: ubuntu
+        mode: 0750
+
+    - name: install service file
+      template:
+        src: ../templates/geth.service
+        dest: /etc/systemd/system/geth.service
+        owner: root
+        group: root
+        mode: 0644
+
+
+    - name: Download lighthouse validator client
+      get_url:
+        url: "https://github.com/sigp/lighthouse/releases/download/v3.1.2/lighthouse-v3.1.2-x86_64-unknown-linux-gnu-portable.tar.gz"
+        dest: "/home/ubuntu/v3.1.2.tar.gz"
+        mode: 0644
+
+    - name: extract lighthouseVC tarball
+      unarchive:
+        remote_src: yes
+        src: "/home/ubuntu/v3.1.2.tar.gz"
+        dest: "/home/ubuntu"
+
+    - name: ensure lighthouseVC service stopped before copy
+      shell: "[[ -e /lib/systemd/system/lighthouse-vc.service ]] && systemctl stop geth"
+      ignore_errors: yes
+
+    - name: copy the lighthouseVC binary
+      shell: /bin/mv /home/ubuntu/lighthouse /usr/local/bin
+
+
+    - name: create data directory for lighthouseVC
+      file:
+        state: directory
+        path: /data/lighthouse-vc
+        owner: ubuntu
+        group: ubuntu
+        mode: 0750
+
+    - name: create data directory for lighthouseBeacon Node
+      file:
+        state: directory
+        path: /data/lighthouse
+        owner: ubuntu
+        group: ubuntu
+        mode: 0750
+
+    - name: install lighthouseVC service file
+      template:
+        src: ../templates/lighthouse-vc.service
+        dest: /etc/systemd/system/lighthouse-vc.service
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: install lighthouseVC service file
+      template:
+        src: ../templates/lighthouse.service
+        dest: /etc/systemd/system/lighthouse.service
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: reload systemd
+      shell: systemctl daemon-reload
+
+    - name: Start the geth service
+      action: service name=geth state=restarted
+
+    
+    - name: Start the lighthouse service
+      action: service name=lighthouse state=restarted
+
+    - name: Start the lighthouseVC service
+      action: service name=lighthouse-vc state=restarted

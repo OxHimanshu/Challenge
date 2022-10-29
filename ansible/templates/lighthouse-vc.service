@@ -1,0 +1,18 @@
+[Unit]
+Description=lighthouse: An Ethereum Consensus Implementation Written in Go
+Requires=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+Restart=on-failure
+ExecStart=/usr/local/bin/lighthouse vc \
+         --network mainnet \
+         --log-format JSON \
+         --builder-proposals \
+         --metrics \
+         --datadir /data/lighthouse-vc
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,16 @@
+[Unit]
+Description=go-thereum client
+Requires=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+Restart=on-failure
+ExecStart=/usr/local/bin/geth \
+        --http \
+        --http.api "eth,web3,txpool,net,debug,engine" \
+        --datadir /data/ethereum
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,125 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deployer Script
+
+Resources:
+  WebAppInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-024c319d5d14b463e  # ImageID valid only in us-east-1 region
+      InstanceType: t2.micro
+      KeyName: deployer # <-- Change to use your key-pair name
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            DeleteOnTermination: false
+            VolumeSize: 10
+      Tags:
+        - Key: Deployer
+          Value: Ansible
+      SecurityGroupIds:
+        - !Ref SSHSecurityGroup
+  DeployerElasticIP:                                                   # Elastic IP Block of Deployer(Ansible)
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      AllocationId: eipalloc-08918628bd0cc10c2
+      InstanceId: !Ref  WebAppInstance
+ 
+  GethInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-024c319d5d14b463e  # ImageID valid only in us-east-1 region
+      InstanceType: t2.xlarge
+      KeyName: gethLighthouse # <-- Change to use your key-pair name
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            DeleteOnTermination: false
+            VolumeSize: 100
+      Tags:
+        - Key: Node
+          Value: gethNode
+      SecurityGroupIds:
+        - !Ref WebSecurityGroup
+        - !Ref SSHSecurityGroup
+        - !Ref MetricsExporters
+  GethElasticIP:                                                      # Elastic IP Block of Geth
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      AllocationId: eipalloc-04cb46ef7b6172637	
+      InstanceId: !Ref  GethInstance
+
+  MonitoringStack:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-024c319d5d14b463e  # ImageID valid only in us-east-1 region
+      InstanceType: t2.micro
+      KeyName: GrafanaDashboard # <-- Change to use your key-pair name
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            DeleteOnTermination: false
+            VolumeSize: 20
+      Tags:
+        - Key: MonitoringStack
+          Value: PrometheusGrafana
+      SecurityGroupIds:
+        - !Ref WebSecurityGroup  
+        - !Ref SSHSecurityGroup    
+        - !Ref PrometheusExporters
+  MonitoringStackElasticIP:                                          # Elastic IP Block of MonitoringStack
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      AllocationId: eipalloc-0023d3cde555fea65
+      InstanceId: !Ref  MonitoringStack
+
+
+
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join ["-", [web-security-group, dev]]
+      GroupDescription: "Allow HTTP/HTTPS and SSH inbound and outbound traffic"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  SSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join ["-", [ssh-security-group, dev]]
+      GroupDescription: "Allow  SSH inbound and outbound traffic"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  MetricsExporters:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join ["-", [metrics-exporters-security-group, dev]]
+      GroupDescription: "Allow exporters inound and outbound traffic"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5054
+          ToPort: 5054
+          CidrIp: 3.108.93.253/32
+
+  PrometheusExporters:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join ["-", [prometheus-security-group, dev]]
+      GroupDescription: "Allow prometheus inound and outbound traffic"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5064
+          ToPort: 5064
+          CidrIp: 3.108.93.253/32 
+  
+

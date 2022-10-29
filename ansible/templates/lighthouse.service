@@ -1,0 +1,22 @@
+[Unit]
+Description=lighthouse: An Ethereum Consensus Implementation Written in Go
+Requires=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+Restart=on-failure
+ExecStart=/usr/local/bin/lighthouse bn \
+         --network mainnet \
+         --datadir /data/lighthouse \
+         --eth1-endpoints http://127.0.0.1:8545 \
+         --execution-endpoint http://127.0.0.1:8551 \
+         --execution-jwt /path/to/jwtsecret \
+         --metrics \
+         --validator-monitor-auto \
+         --target-peers 100
+
+
+[Install]
+WantedBy=default.target

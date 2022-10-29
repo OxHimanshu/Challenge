@@ -1,0 +1,9 @@
+all:
+  hosts:
+  children:
+    geth:
+      hosts:
+        43.205.4.153
+    stack:
+      hosts:
+        3.108.93.253
