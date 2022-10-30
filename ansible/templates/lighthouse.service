@@ -9,12 +9,13 @@ Group=ubuntu
 Restart=on-failure
 ExecStart=/usr/local/bin/lighthouse bn \
          --network mainnet \
+         --http \
          --datadir /data/lighthouse \
-         --eth1-endpoints http://127.0.0.1:8545 \
-         --execution-endpoint http://127.0.0.1:8551 \
-         --execution-jwt /path/to/jwtsecret \
+         --execution-endpoint http://127.0.0.1:8551/ \
+         --checkpoint-sync-url https://mainnet-checkpoint-sync.stakely.io \
+         --execution-jwt /home/ubuntu/jwttoken/jwtsecret.hex \
          --metrics \
-         --validator-monitor-auto \
+         --metrics-address 0.0.0.0 \
          --target-peers 100
 
 

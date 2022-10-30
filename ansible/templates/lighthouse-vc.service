@@ -7,12 +7,7 @@ Type=simple
 User=ubuntu
 Group=ubuntu
 Restart=on-failure
-ExecStart=/usr/local/bin/lighthouse vc \
-         --network mainnet \
-         --log-format JSON \
-         --builder-proposals \
-         --metrics \
-         --datadir /data/lighthouse-vc
+ExecStart=/usr/local/bin/lighthouse vc --network mainnet --datadir /data/lighthouse-vc --http --metrics --metrics-address 0.0.0.0
 
 [Install]
 WantedBy=default.target
