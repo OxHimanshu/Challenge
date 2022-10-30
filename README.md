@@ -83,3 +83,18 @@ For geth nodes:
 ```bash
 ansible geth -m shell -a "df -h"
 ```
+
+### For Grafana dashbaord
+
+```bash
+https://grafana.tryscatter.xyz/d/yY7PIGdZd/summary?orgId=1&refresh=10s
+```
+
+For Credentials:
+
+```bash
+username: demo
+password: @Qwertyuiop@0012
+Permission: view only
+```
+

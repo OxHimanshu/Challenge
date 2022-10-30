@@ -1,0 +1,27 @@
+server {
+      listen [::]:80;
+      listen 80;
+      server_name grafana.tryscatter.xyz www.grafana.tryscatter.xyz;
+      return 301 https://grafana.tryscatter.xyz$request_uri;
+
+}
+
+server {
+      listen [::]:443 ssl;
+      listen 443 ssl;
+
+      server_name grafana.tryscatter.xyz;
+      ssl_certificate /etc/letsencrypt/live/grafana.tryscatter.xyz/fullchain.pem;
+      ssl_certificate_key /etc/letsencrypt/live/grafana.tryscatter.xyz/privkey.pem;
+
+      location / {
+          proxy_pass http://localhost:3000;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection 'upgrade';
+          proxy_set_header Host $host;
+          proxy_cache_bypass $http_upgrade;
+      }
+
+
+}
